@@ -12,7 +12,7 @@ namespace
 	TAutoConsoleVariable<int32> CVarBattingDebug(TEXT("cricket.Debug.Batting"), 1,
 		TEXT("Batting motion debug visualization. 0=off, 1=on"));
 
-	FColor RegionColor(ECricketContactRegion Region)
+	FColor BattingRegionColor(ECricketContactRegion Region)
 	{
 		switch (Region)
 		{
@@ -160,7 +160,7 @@ void UCricketBattingDebugComponent::DrawContact() const
 {
 	const FVector ContactCm = Batting->GetLastContactCm();
 	const FCricketBatImpactReport& R = Batting->GetLastReport();
-	DrawDebugSphere(GetWorld(), ContactCm, 5.f, 12, RegionColor(R.Region), false, -1.f, 0, 2.5f);
+	DrawDebugSphere(GetWorld(), ContactCm, 5.f, 12, BattingRegionColor(R.Region), false, -1.f, 0, 2.5f);
 	DrawDebugDirectionalArrow(GetWorld(), ContactCm, ContactCm + R.OutgoingVelocity * 4.f, 14.f,
 		FColor::Orange, false, -1.f, 0, 2.5f);
 }
@@ -192,7 +192,7 @@ void UCricketBattingDebugComponent::DrawReadout() const
 		const FString TimingStr = TimingEnum ? TimingEnum->GetDisplayNameTextByValue((int64)T.Quality).ToString() : TEXT("?");
 		GEngine->AddOnScreenDebugMessage(3003, 0.f, TimingColor(T.Quality),
 			FString::Printf(TEXT("Timing: %s  (%+.0f ms)"), *TimingStr, T.TimingErrorSec * 1000.0));
-		GEngine->AddOnScreenDebugMessage(3004, 0.f, RegionColor(R.Region),
+		GEngine->AddOnScreenDebugMessage(3004, 0.f, BattingRegionColor(R.Region),
 			FString::Printf(TEXT("Contact: %s  |  Exit %.1f km/h  |  Quality %.2f"),
 				*StaticEnum<ECricketContactRegion>()->GetDisplayNameTextByValue((int64)R.Region).ToString(),
 				MsToKmh(R.ExitSpeedMS), R.Quality));

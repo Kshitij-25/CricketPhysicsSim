@@ -20,12 +20,31 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "CricketAI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "CricketUI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "CricketAudio",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "CricketSimEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
 		{
 			"Name": "ChaosVehiclesPlugin",
 			"Enabled": false

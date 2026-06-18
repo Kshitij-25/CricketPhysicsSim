@@ -25,7 +25,7 @@ namespace
 		return D;
 	}
 
-	using M = FCricketStadiumModel;
+	using StadiumM = FCricketStadiumModel;
 }
 
 // 1. BOUNDARY GEOMETRY: the ellipse radius is the straight/square distance on-axis,
@@ -36,14 +36,14 @@ bool FCricketStadiumGeometryTest::RunTest(const FString&)
 {
 	const FCricketGroundDimensions D = Ground(75, 68);
 
-	TestTrue(TEXT("Straight radius (on-axis)"), FMath::IsNearlyEqual(M::BoundaryRadiusAtAngleM(D, 0.0), 75.0, 1e-6));
-	TestTrue(TEXT("Square radius (perpendicular)"), FMath::IsNearlyEqual(M::BoundaryRadiusAtAngleM(D, PI / 2), 68.0, 1e-6));
+	TestTrue(TEXT("Straight radius (on-axis)"), FMath::IsNearlyEqual(StadiumM::BoundaryRadiusAtAngleM(D, 0.0), 75.0, 1e-6));
+	TestTrue(TEXT("Square radius (perpendicular)"), FMath::IsNearlyEqual(StadiumM::BoundaryRadiusAtAngleM(D, PI / 2), 68.0, 1e-6));
 
-	TestTrue(TEXT("Centre is inside"), M::IsInsideBoundary(D, FVector(0, 0, 0)));
-	TestTrue(TEXT("Just inside straight"), M::IsInsideBoundary(D, FVector(74, 0, 0)));
-	TestFalse(TEXT("Beyond straight is outside"), M::IsInsideBoundary(D, FVector(76, 0, 0)));
-	TestTrue(TEXT("Just inside square"), M::IsInsideBoundary(D, FVector(0, 67, 0)));
-	TestFalse(TEXT("Beyond square is outside"), M::IsInsideBoundary(D, FVector(0, 69, 0)));
+	TestTrue(TEXT("Centre is inside"), StadiumM::IsInsideBoundary(D, FVector(0, 0, 0)));
+	TestTrue(TEXT("Just inside straight"), StadiumM::IsInsideBoundary(D, FVector(74, 0, 0)));
+	TestFalse(TEXT("Beyond straight is outside"), StadiumM::IsInsideBoundary(D, FVector(76, 0, 0)));
+	TestTrue(TEXT("Just inside square"), StadiumM::IsInsideBoundary(D, FVector(0, 67, 0)));
+	TestFalse(TEXT("Beyond square is outside"), StadiumM::IsInsideBoundary(D, FVector(0, 69, 0)));
 	return true;
 }
 
@@ -59,7 +59,7 @@ bool FCricketStadiumFourTest::RunTest(const FString&)
 		FVector(40, 0, 0.4), FVector(60, 0, 0.3), FVector(80, 0, 0.2)
 	};
 	FVector Cross;
-	const ECricketBoundaryResult R = M::ClassifyBoundary(D, Path, /*FirstBounceIdx*/ 2, Cross);
+	const ECricketBoundaryResult R = StadiumM::ClassifyBoundary(D, Path, /*FirstBounceIdx*/ 2, Cross);
 	TestEqual(TEXT("Bounced inside then over = four"), R, ECricketBoundaryResult::Four);
 	TestTrue(TEXT("Crossing recorded near the rope"), Cross.X > 75.0);
 	return true;
@@ -75,7 +75,7 @@ bool FCricketStadiumSixTest::RunTest(const FString&)
 		FVector(0, 0, 1), FVector(20, 0, 10), FVector(40, 0, 16), FVector(60, 0, 14), FVector(80, 0, 6)
 	};
 	FVector Cross;
-	const ECricketBoundaryResult R = M::ClassifyBoundary(D, Path, /*FirstBounceIdx*/ INDEX_NONE, Cross);
+	const ECricketBoundaryResult R = StadiumM::ClassifyBoundary(D, Path, /*FirstBounceIdx*/ INDEX_NONE, Cross);
 	TestEqual(TEXT("Cleared the rope = six"), R, ECricketBoundaryResult::Six);
 	TestTrue(TEXT("Crossing is airborne"), Cross.Z > D.RopeHeightM);
 	return true;
@@ -89,14 +89,14 @@ bool FCricketStadiumCatchTest::RunTest(const FString&)
 	const FCricketGroundDimensions D = Ground(75, 68);
 
 	TestEqual(TEXT("Caught inside the rope = out"),
-		M::ValidateBoundaryCatch(D, FVector(70, 0, 1.5)), ECricketBoundaryResult::CaughtAtBoundary);
+		StadiumM::ValidateBoundaryCatch(D, FVector(70, 0, 1.5)), ECricketBoundaryResult::CaughtAtBoundary);
 	TestEqual(TEXT("Foot over the rope = six"),
-		M::ValidateBoundaryCatch(D, FVector(78, 0, 1.5)), ECricketBoundaryResult::Six);
+		StadiumM::ValidateBoundaryCatch(D, FVector(78, 0, 1.5)), ECricketBoundaryResult::Six);
 
 	// The SAME catch point is a six on a smaller ground (the rope is closer in).
 	const FCricketGroundDimensions Small = Ground(65, 60);
 	TestEqual(TEXT("Same spot is over the rope on a small ground"),
-		M::ValidateBoundaryCatch(Small, FVector(70, 0, 1.5)), ECricketBoundaryResult::Six);
+		StadiumM::ValidateBoundaryCatch(Small, FVector(70, 0, 1.5)), ECricketBoundaryResult::Six);
 	return true;
 }
 
@@ -111,10 +111,10 @@ bool FCricketStadiumGroundSizeTest::RunTest(const FString&)
 	};
 	FVector Cross;
 
-	const ECricketBoundaryResult Small = M::ClassifyBoundary(Ground(65, 60), Path, INDEX_NONE, Cross);
+	const ECricketBoundaryResult Small = StadiumM::ClassifyBoundary(Ground(65, 60), Path, INDEX_NONE, Cross);
 	TestEqual(TEXT("Six on a small ground"), Small, ECricketBoundaryResult::Six);
 
-	const ECricketBoundaryResult Big = M::ClassifyBoundary(Ground(90, 85), Path, INDEX_NONE, Cross);
+	const ECricketBoundaryResult Big = StadiumM::ClassifyBoundary(Ground(90, 85), Path, INDEX_NONE, Cross);
 	TestEqual(TEXT("In play on a big ground"), Big, ECricketBoundaryResult::InPlay);
 	return true;
 }
@@ -129,27 +129,27 @@ bool FCricketStadiumFieldTest::RunTest(const FString&)
 	const FVector Striker = D.StrikerStumpsM();
 
 	// Every position in the default field is inside the boundary.
-	for (ECricketFieldPosition P : M::DefaultField().Positions)
+	for (ECricketFieldPosition P : StadiumM::DefaultField().Positions)
 	{
-		TestTrue(TEXT("Position is inside the rope"), M::IsInsideBoundary(D, M::FieldPositionWorldM(D, P, true)));
+		TestTrue(TEXT("Position is inside the rope"), StadiumM::IsInsideBoundary(D, StadiumM::FieldPositionWorldM(D, P, true)));
 	}
 
 	// Off-side positions are +Y (RH); leg-side are -Y.
-	TestTrue(TEXT("Cover is off side (+Y)"), M::FieldPositionWorldM(D, ECricketFieldPosition::Cover, true).Y > Striker.Y);
-	TestTrue(TEXT("Point is off side (+Y)"), M::FieldPositionWorldM(D, ECricketFieldPosition::Point, true).Y > Striker.Y);
-	TestTrue(TEXT("Midwicket is leg side (-Y)"), M::FieldPositionWorldM(D, ECricketFieldPosition::Midwicket, true).Y < Striker.Y);
-	TestTrue(TEXT("Square leg is leg side (-Y)"), M::FieldPositionWorldM(D, ECricketFieldPosition::SquareLeg, true).Y < Striker.Y);
+	TestTrue(TEXT("Cover is off side (+Y)"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::Cover, true).Y > Striker.Y);
+	TestTrue(TEXT("Point is off side (+Y)"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::Point, true).Y > Striker.Y);
+	TestTrue(TEXT("Midwicket is leg side (-Y)"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::Midwicket, true).Y < Striker.Y);
+	TestTrue(TEXT("Square leg is leg side (-Y)"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::SquareLeg, true).Y < Striker.Y);
 
 	// Slip stands behind the batter; mid-off is in front (toward the bowler).
-	TestTrue(TEXT("Slip is behind the striker"), M::FieldPositionWorldM(D, ECricketFieldPosition::Slip, true).X < Striker.X);
-	TestTrue(TEXT("Mid-off is in front"), M::FieldPositionWorldM(D, ECricketFieldPosition::MidOff, true).X > Striker.X);
+	TestTrue(TEXT("Slip is behind the striker"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::Slip, true).X < Striker.X);
+	TestTrue(TEXT("Mid-off is in front"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::MidOff, true).X > Striker.X);
 
 	// Left-hander mirrors the off side to -Y.
-	TestTrue(TEXT("Cover mirrors to -Y for a left-hander"), M::FieldPositionWorldM(D, ECricketFieldPosition::Cover, false).Y < Striker.Y);
+	TestTrue(TEXT("Cover mirrors to -Y for a left-hander"), StadiumM::FieldPositionWorldM(D, ECricketFieldPosition::Cover, false).Y < Striker.Y);
 
 	// Depth scales with ground size: long-on is further out on a bigger ground.
-	const double Small = (M::FieldPositionWorldM(Ground(65, 60), ECricketFieldPosition::LongOn, true) - Striker).Size();
-	const double Large = (M::FieldPositionWorldM(Ground(90, 85), ECricketFieldPosition::LongOn, true) - Striker).Size();
+	const double Small = (StadiumM::FieldPositionWorldM(Ground(65, 60), ECricketFieldPosition::LongOn, true) - Striker).Size();
+	const double Large = (StadiumM::FieldPositionWorldM(Ground(90, 85), ECricketFieldPosition::LongOn, true) - Striker).Size();
 	TestTrue(TEXT("Deep positions scale with ground size"), Large > Small + 10.0);
 	return true;
 }

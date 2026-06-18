@@ -23,7 +23,7 @@ namespace
 	TAutoConsoleVariable<int32> CVarPitchPvA(TEXT("cricket.Debug.Pitch.PredictedVsActual"), -1,
 		TEXT("Draw predicted vs actual bounce point + error. -1=settings"));
 
-	bool Resolve(const TAutoConsoleVariable<int32>& Cvar, bool bSettingsDefault)
+	bool PitchResolve(const TAutoConsoleVariable<int32>& Cvar, bool bSettingsDefault)
 	{
 		const int32 V = Cvar.GetValueOnGameThread();
 		return V < 0 ? bSettingsDefault : (V != 0);
@@ -92,13 +92,13 @@ void UCricketPitchDebugComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	}
 
 	const UCricketPhysicsSettings* S = GetDefault<UCricketPhysicsSettings>();
-	if (!Resolve(CVarPitchEnable, S->bEnablePitchDebug))
+	if (!PitchResolve(CVarPitchEnable, S->bEnablePitchDebug))
 	{
 		PrevVelocityMS = Ball->GetState().Velocity;
 		return;
 	}
 
-	if (Resolve(CVarPitchPvA, S->bDrawPitchPredictedVsActual))
+	if (PitchResolve(CVarPitchPvA, S->bDrawPitchPredictedVsActual))
 	{
 		UpdatePredictedBounce();
 	}
@@ -147,7 +147,7 @@ void UCricketPitchDebugComponent::DrawBounce(const FBounceViz& B) const
 	DrawDebugSphere(World, B.ContactCm, 6.f, 12, FColor::Red, false, -1.f, 0, 1.5f);
 
 	// Bounce angle: incoming (red, pointing INTO the spot) + outgoing (green).
-	if (Resolve(CVarPitchAngle, S->bDrawPitchBounceAngle))
+	if (PitchResolve(CVarPitchAngle, S->bDrawPitchBounceAngle))
 	{
 		constexpr float Len = 45.f; // cm
 		if (!B.IncomingDir.IsNearlyZero())
@@ -164,7 +164,7 @@ void UCricketPitchDebugComponent::DrawBounce(const FBounceViz& B) const
 
 	// Turn (spin) and seam-deviation lateral kicks. Both are signed cross-line
 	// magnitudes; draw them along the world +Y (off side) axis from the spot.
-	if (Resolve(CVarPitchTurnSeam, S->bDrawPitchTurnSeam))
+	if (PitchResolve(CVarPitchTurnSeam, S->bDrawPitchTurnSeam))
 	{
 		const FVector Side = FVector(0, 1, 0);
 		const FVector TurnEnd = B.ContactCm + Side * (B.Report.TurnMS * LateralArrowScale) + FVector(0, 0, 4);
@@ -174,14 +174,14 @@ void UCricketPitchDebugComponent::DrawBounce(const FBounceViz& B) const
 	}
 
 	// Predicted vs actual error.
-	if (B.bHasPrediction && Resolve(CVarPitchPvA, S->bDrawPitchPredictedVsActual))
+	if (B.bHasPrediction && PitchResolve(CVarPitchPvA, S->bDrawPitchPredictedVsActual))
 	{
 		DrawDebugSphere(World, B.PredictedContactCm, 7.f, 12, FColor::Yellow, false, -1.f, 0, 1.f);
 		DrawDebugLine(World, B.PredictedContactCm, B.ContactCm, FColor::Purple, false, -1.f, 0, 1.5f);
 	}
 
 	// Floating per-bounce surface/physics readout.
-	if (Resolve(CVarPitchSurface, S->bDrawPitchSurfaceInfo))
+	if (PitchResolve(CVarPitchSurface, S->bDrawPitchSurfaceInfo))
 	{
 		const FCricketBounceReport& R = B.Report;
 		const FString Text = FString::Printf(
